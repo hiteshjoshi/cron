@@ -2,11 +2,13 @@ package cron
 
 import (
 	"fmt"
+	"github.com/hiteshjoshi/gabs"
 	"log"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+	"reflect"
 )
 
 // Parse returns a new crontab schedule representing the given spec.
@@ -15,7 +17,7 @@ import (
 // It accepts
 //   - Full crontab specs, e.g. "* * * * * ?"
 //   - Descriptors, e.g. "@midnight", "@every 1h30m"
-func Parse(spec string) (_ Schedule, err error) {
+func Parse(spec string, timezone string) (_ Schedule, err error) {
 	// Convert panics into errors
 	defer func() {
 		if recovered := recover(); recovered != nil {
@@ -23,8 +25,9 @@ func Parse(spec string) (_ Schedule, err error) {
 		}
 	}()
 
+
 	if spec[0] == '@' {
-		return parseDescriptor(spec), nil
+		return parseDescriptor(spec,timezone), nil
 	}
 
 	// Split on whitespace.  We require 5 or 6 fields.
@@ -39,10 +42,12 @@ func Parse(spec string) (_ Schedule, err error) {
 		fields = append(fields, "*")
 	}
 
+	h,m := GetTimezone(timezone)
+
 	schedule := &SpecSchedule{
 		Second: getField(fields[0], seconds),
-		Minute: getField(fields[1], minutes),
-		Hour:   getField(fields[2], hours),
+		Minute: getField(fields[1], minutes) + uint64(m),
+		Hour:   getField(fields[2], hours) + uint64(h),
 		Dom:    getField(fields[3], dom),
 		Month:  getField(fields[4], months),
 		Dow:    getField(fields[5], dow),
@@ -164,13 +169,15 @@ func all(r bounds) uint64 {
 
 // parseDescriptor returns a pre-defined schedule for the expression, or panics
 // if none matches.
-func parseDescriptor(spec string) Schedule {
+func parseDescriptor(spec string,timezone string) Schedule {
+	h,m := GetTimezone(timezone)
+
 	switch spec {
 	case "@yearly", "@annually":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << minutes.min,
-			Hour:   1 << hours.min,
+			Minute: 1 << (minutes.min+ uint(m)),
+			Hour:   1 << (hours.min+ uint(h)),
 			Dom:    1 << dom.min,
 			Month:  1 << months.min,
 			Dow:    all(dow),
@@ -179,8 +186,8 @@ func parseDescriptor(spec string) Schedule {
 	case "@monthly":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << minutes.min,
-			Hour:   1 << hours.min,
+			Minute: 1 << (minutes.min+ uint(m)),
+			Hour:   1 << (hours.min+ uint(h)),
 			Dom:    1 << dom.min,
 			Month:  all(months),
 			Dow:    all(dow),
@@ -189,8 +196,8 @@ func parseDescriptor(spec string) Schedule {
 	case "@weekly":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << minutes.min,
-			Hour:   1 << hours.min,
+			Minute: 1 << (minutes.min+ uint(m)),
+			Hour:   1 << (hours.min+ uint(h)),
 			Dom:    all(dom),
 			Month:  all(months),
 			Dow:    1 << dow.min,
@@ -199,8 +206,8 @@ func parseDescriptor(spec string) Schedule {
 	case "@daily", "@midnight":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << minutes.min,
-			Hour:   1 << hours.min,
+			Minute: 1 << (minutes.min+ uint(m)),
+			Hour:   1 << (hours.min+ uint(h)),
 			Dom:    all(dom),
 			Month:  all(months),
 			Dow:    all(dow),
@@ -209,7 +216,7 @@ func parseDescriptor(spec string) Schedule {
 	case "@hourly":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << minutes.min,
+			Minute: 1 << (minutes.min+ uint(m)),
 			Hour:   all(hours),
 			Dom:    all(dom),
 			Month:  all(months),
@@ -228,4 +235,54 @@ func parseDescriptor(spec string) Schedule {
 
 	log.Panicf("Unrecognized descriptor: %s", spec)
 	return nil
+}
+
+func GetTimezone(timezone string) (float64, float64) {
+
+	jsonParsed, err := gabs.ParseJSON([]byte(`
+		{
+			"GMT":{"name":"Greenwich Mean Time","hours":0,"minutes":0},
+			"UTC":{"name":"Universal Coordinated Time","hours":0,"minutes":0},
+			"ECT":{"name":"European Central Time","hours":1,"minutes":0},
+			"EET":{"name":"Eastern European Time","hours":2,"minutes":0},
+			"ART":{"name":"(Arabic) Egypt Standard Time","hours":2,"minutes":0},
+			"EAT":{"name":"Eastern African Time","hours":3,"minutes":0},
+			"MET":{"name":"Middle East Time","hours":3,"minutes":30},
+			"NET":{"name":"Near East Time","hours":4,"minutes":0},
+			"PLT":{"name":"Pakistan Lahore Time","hours":5,"minutes":0},
+			"IST":{"name":"India Standard Time","hours":5,"minutes":30},
+			"BST":{"name":"Bangladesh Standard Time","hours":6,"minutes":0},
+			"VST":{"name":"Vietnam Standard Time","hours":7,"minutes":0},
+			"CTT":{"name":"China Taiwan Time","hours":8,"minutes":0},
+			"JST":{"name":"Japan Standard Time","hours":9,"minutes":0},
+			"ACT":{"name":"Australia Central Time","hours":9,"minutes":30},
+			"AET":{"name":"Australia Eastern Time","hours":10,"minutes":0},
+			"SST":{"name":"Solomon Standard Time","hours":11,"minutes":0},
+			"NST":{"name":"New Zealand Standard Time","hours":12,"minutes":0},
+			"MIT":{"name":"Midway Islands Time","hours":-11,"minutes":0},
+			"HST":{"name":"Hawaii Standard Time","hours":-10,"minutes":0},
+			"AST":{"name":"Alaska Standard Time","hours":-9,"minutes":0},
+			"PST":{"name":"Pacific Standard Time","hours":-8,"minutes":0},
+			"PNT":{"name":"Phoenix Standard Time","hours":-7,"minutes":0},
+			"MST":{"name":"Mountain Standard Time","hours":-7,"minutes":0},
+			"CST":{"name":"Central Standard Time","hours":-6,"minutes":0},
+			"EST":{"name":"Eastern Standard Time","hours":-5,"minutes":0},
+			"IET":{"name":"Indiana Eastern Standard Time","hours":-5,"minutes":0},
+			"PRT":{"name":"Puerto Rico and US Virgin Islands Time","hours":-4,"minutes":0},
+			"CNT":{"name":"Canada Newfoundland Time","hours":-3,"minutes":-30},
+			"AGT":{"name":"Argentina Standard Time","hours":-3,"minutes":0},
+			"BET":{"name":"Brazil Eastern Time","hours":-3,"minutes":0},
+			"CAT":{"name":"Central African Time","hours":-1,"minutes":0}
+		}
+	`))
+
+	if err != nil{
+		panic(err)
+	}
+	exists := jsonParsed.Exists(timezone)
+	if exists {
+		return jsonParsed.Search(timezone, "hours").Data().(float64), jsonParsed.Search(timezone, "minutes").Data().(float64)
+	} else {
+		return 0, 0
+	}
 }

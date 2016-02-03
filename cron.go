@@ -23,6 +23,7 @@ type Job interface {
 	Run()
 }
 
+
 // The Schedule describes a job's duty cycle.
 type Schedule interface {
 	// Return the next activation time, later than the given time.
@@ -83,13 +84,13 @@ type FuncJob func()
 func (f FuncJob) Run() { f() }
 
 // AddFunc adds a func to the Cron to be run on the given schedule.
-func (c *Cron) AddFunc(spec string, cmd func()) error {
-	return c.AddJob(spec, FuncJob(cmd))
+func (c *Cron) AddFunc(spec string, cmd func(),timezone string) error {
+	return c.AddJob(spec, FuncJob(cmd),timezone)
 }
 
 // AddFunc adds a Job to the Cron to be run on the given schedule.
-func (c *Cron) AddJob(spec string, cmd Job) error {
-	schedule, err := Parse(spec)
+func (c *Cron) AddJob(spec string, cmd Job,timezone string) error {
+	schedule, err := Parse(spec,timezone)
 	if err != nil {
 		return err
 	}

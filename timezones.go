@@ -1,0 +1,37 @@
+/*
+{
+      "GMT":{"name":"Greenwich Mean Time","hours":0,"minutes":0},
+      "UTC":{"name":"Universal Coordinated Time","hours":0,"minutes":0},
+      "ECT":{"name":"European Central Time","hours":1,"minutes":0},
+      "EET":{"name":"Eastern European Time","hours":2,"minutes":0},
+      "ART":{"name":"(Arabic) Egypt Standard Time","hours":2,"minutes":0},
+      "EAT":{"name":"Eastern African Time","hours":3,"minutes":0},
+      "MET":{"name":"Middle East Time","hours":3,"minutes":30},
+      "NET":{"name":"Near East Time","hours":4,"minutes":0},
+      "PLT":{"name":"Pakistan Lahore Time","hours":5,"minutes":0},
+      "IST":{"name":"India Standard Time","hours":5,"minutes":30},
+      "BST":{"name":"Bangladesh Standard Time","hours":6,"minutes":0},
+      "VST":{"name":"Vietnam Standard Time","hours":7,"minutes":0},
+      "CTT":{"name":"China Taiwan Time","hours":8,"minutes":0},
+      "JST":{"name":"Japan Standard Time","hours":9,"minutes":0},
+      "ACT":{"name":"Australia Central Time","hours":9,"minutes":30},
+      "AET":{"name":"Australia Eastern Time","hours":10,"minutes":0},
+      "SST":{"name":"Solomon Standard Time","hours":11,"minutes":0},
+      "NST":{"name":"New Zealand Standard Time","hours":12,"minutes":0},
+      "MIT":{"name":"Midway Islands Time","hours":-11,"minutes":0},
+      "HST":{"name":"Hawaii Standard Time","hours":-10,"minutes":0},
+      "AST":{"name":"Alaska Standard Time","hours":-9,"minutes":0},
+      "PST":{"name":"Pacific Standard Time","hours":-8,"minutes":0},
+      "PNT":{"name":"Phoenix Standard Time","hours":-7,"minutes":0},
+      "MST":{"name":"Mountain Standard Time","hours":-7,"minutes":0},
+      "CST":{"name":"Central Standard Time","hours":-6,"minutes":0},
+      "EST":{"name":"Eastern Standard Time","hours":-5,"minutes":0},
+      "IET":{"name":"Indiana Eastern Standard Time","hours":-5,"minutes":0},
+      "PRT":{"name":"Puerto Rico and US Virgin Islands Time","hours":-4,"minutes":0},
+      "CNT":{"name":"Canada Newfoundland Time","hours":-3,"minutes":-30},
+      "AGT":{"name":"Argentina Standard Time","hours":-3,"minutes":0},
+      "BET":{"name":"Brazil Eastern Time","hours":-3,"minutes":0},
+      "CAT":{"name":"Central African Time","hours":-1,"minutes":0}
+    }
+*/
+package cron
