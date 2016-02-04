@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	//"strconv"
+	//"reflect"
 )
 
 // Parse returns a new crontab schedule representing the given spec.
@@ -176,14 +176,16 @@ func all(r bounds) uint64 {
 // parseDescriptor returns a pre-defined schedule for the expression, or panics
 // if none matches.
 func parseDescriptor(spec string,timezone string) Schedule {
+	
+	//hours and minutes to minus from timezone
 	h,m := GetTimezone(timezone)
 
 	switch spec {
 	case "@yearly", "@annually":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << (minutes.min+ uint(m)),
-			Hour:   1 << (hours.min+ uint(h)),
+			Minute: 1 << uint64(float64(minutes.min)+m),
+			Hour:   1 << uint64(float64(hours.min)+h),
 			Dom:    1 << dom.min,
 			Month:  1 << months.min,
 			Dow:    all(dow),
@@ -192,8 +194,8 @@ func parseDescriptor(spec string,timezone string) Schedule {
 	case "@monthly":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << (minutes.min+ uint(m)),
-			Hour:   1 << (hours.min+ uint(h)),
+			Minute: 1 << uint64(float64(minutes.min)+m),
+			Hour:   1 << uint64(float64(hours.min)+h),
 			Dom:    1 << dom.min,
 			Month:  all(months),
 			Dow:    all(dow),
@@ -202,8 +204,8 @@ func parseDescriptor(spec string,timezone string) Schedule {
 	case "@weekly":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << (minutes.min+ uint(m)),
-			Hour:   1 << (hours.min+ uint(h)),
+			Minute: 1 << uint64(float64(minutes.min)+m),
+			Hour:   1 << uint64(float64(hours.min)+h),
 			Dom:    all(dom),
 			Month:  all(months),
 			Dow:    1 << dow.min,
@@ -212,8 +214,8 @@ func parseDescriptor(spec string,timezone string) Schedule {
 	case "@daily", "@midnight":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << (minutes.min+ uint(m)),
-			Hour:   1 << (hours.min+ uint(h)),
+			Minute: 1 << uint64(float64(minutes.min)+m),
+			Hour:   1 << uint64(float64(hours.min)+h),
 			Dom:    all(dom),
 			Month:  all(months),
 			Dow:    all(dow),
@@ -222,7 +224,7 @@ func parseDescriptor(spec string,timezone string) Schedule {
 	case "@hourly":
 		return &SpecSchedule{
 			Second: 1 << seconds.min,
-			Minute: 1 << (minutes.min+ uint(m)),
+			Minute: 1 << uint64(float64(minutes.min)+m),
 			Hour:   all(hours),
 			Dom:    all(dom),
 			Month:  all(months),
