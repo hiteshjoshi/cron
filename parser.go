@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
+	//"strconv"
 )
 
 // Parse returns a new crontab schedule representing the given spec.
@@ -42,12 +42,18 @@ func Parse(spec string, timezone string) (_ Schedule, err error) {
 		fields = append(fields, "*")
 	}
 
+	//hours and minutes to minus
 	h,m := GetTimezone(timezone)
+
+
+	declaredMinutes,_:=strconv.ParseFloat(fields[1],64)
+	declaredHours,_:=strconv.ParseFloat(fields[2],64)
+	
 
 	schedule := &SpecSchedule{
 		Second: getField(fields[0], seconds),
-		Minute: getField(fields[1], minutes) + uint64(m),
-		Hour:   getField(fields[2], hours) + uint64(h),
+		Minute: getField(strconv.FormatFloat(declaredMinutes+m, 'f', 6, 64) , minutes),
+		Hour:   getField(strconv.FormatFloat(declaredHours+h, 'f', 6, 64), hours),
 		Dom:    getField(fields[3], dom),
 		Month:  getField(fields[4], months),
 		Dow:    getField(fields[5], dow),
