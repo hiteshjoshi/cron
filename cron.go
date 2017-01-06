@@ -16,7 +16,7 @@ type Cron struct {
 	remove   chan EntryID
 	snapshot chan []Entry
 	running  bool
-	nextID   EntryID
+	NextID   EntryID
 }
 
 // Job is an interface for submitted cron jobs.
@@ -109,9 +109,9 @@ func (c *Cron) AddJob(spec string, cmd Job) (EntryID, error) {
 
 // Schedule adds a Job to the Cron to be run on the given schedule.
 func (c *Cron) Schedule(schedule Schedule, cmd Job) EntryID {
-	c.nextID++
+	c.NextID++
 	entry := &Entry{
-		ID:       c.nextID,
+		ID:       c.NextID,
 		Schedule: schedule,
 		Job:      cmd,
 	}
